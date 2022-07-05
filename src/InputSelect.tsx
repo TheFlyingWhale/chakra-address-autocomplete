@@ -5,20 +5,25 @@ interface InputSelectProps {
     placeholder?: string;
     options: string[];
     size: string;
+    option: string;
+    setOption: (arg0: string) => void;
 }
 
 export const InputSelect = ({
     placeholder = "",
     options,
     size = "md",
+    option,
+    setOption,
 }: InputSelectProps) => {
-    const [input, setInput] = useState<string>("");
+    const [input, setInput] = useState<string>(option);
     const [activeOptionIndex, setActiveOptionIndex] = useState<number>(0);
     const [showOptions, setShowOptions] = useState<boolean>(false);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const userInput = e.target.value;
 
+        setOption(userInput);
         setInput(userInput);
         setActiveOptionIndex(0);
         setShowOptions(true);
@@ -107,7 +112,7 @@ export const InputSelect = ({
             );
         }
         return (
-            <div>
+            <div style={{ overflow: "hidden", position: "absolute" }}>
                 <Text>No options</Text>
             </div>
         );
