@@ -1,22 +1,18 @@
 import React, { useState } from "react";
-import { Input, ListItem, UnorderedList, Text } from "@chakra-ui/react";
+import { Input, ListItem, UnorderedList, Text, Button } from "@chakra-ui/react";
 
 interface InputSelectProps {
     placeholder?: string;
     options: string[];
-    // option: OptionType;
-    // setOption: React.Dispatch<OptionType>;
     size: string;
 }
 
 export const InputSelect = ({
     placeholder = "",
     options,
-    // option,
-    // setOption,
     size = "md",
 }: InputSelectProps) => {
-    const [input, setInput] = useState<string | undefined>(undefined);
+    const [input, setInput] = useState<string>("");
     const [activeOptionIndex, setActiveOptionIndex] = useState<number>(0);
     const [showOptions, setShowOptions] = useState<boolean>(false);
 
@@ -28,22 +24,38 @@ export const InputSelect = ({
         setShowOptions(true);
     };
 
+    //Handles both blur and itemClick
     const handleInputBlur = (e: React.FocusEvent<HTMLInputElement>) => {
-        console.log("handleInputBlur");
-        // e.preventDefault();
-        // console.log(e.currentTarget);
-        // console.log(e);
-        // console.log(e.relatedTarget);
-        // setShowOptions(false);
+        //check if the clicked item is an option
+        if (e.relatedTarget !== null && e.relatedTarget.id === "optionItem") {
+            setInput(e.relatedTarget.innerHTML);
+        }
+        setShowOptions(false);
     };
 
-    const handleItemClick = (e: React.MouseEvent<HTMLElement>) => {
-        console.log("handleItemClick");
-        // console.log("item click");
-        // console.log(e.currentTarget.innerText);
-        // setInput(e.currentTarget.innerText);
-        // setShowOptions(false);
-        // setActiveOptionIndex(0);
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        //User pressed the enter key
+        if (e.keyCode === 13) {
+            setInput(options[activeOptionIndex]);
+            setActiveOptionIndex(0);
+            setShowOptions(false);
+        }
+        // User pressed the up arrow
+        else if (e.keyCode === 38) {
+            if (activeOptionIndex === 0) {
+                return;
+            }
+
+            setActiveOptionIndex(activeOptionIndex - 1);
+        }
+        // User pressed the down arrow
+        else if (e.keyCode === 40) {
+            if (activeOptionIndex + 1 === options.length) {
+                return;
+            }
+
+            setActiveOptionIndex(activeOptionIndex + 1);
+        }
     };
 
     const OptionsList = () => {
@@ -51,12 +63,15 @@ export const InputSelect = ({
             return (
                 <UnorderedList
                     id="myList"
-                    // pos="absolute"
+                    pos="absolute"
                     m={0}
-                    bg="white"
+                    mt={2}
+                    bg="gray.50"
+                    borderRadius={12}
                     zIndex={2}
                     w="full"
                     styleType="none"
+                    style={{ overflow: "hidden" }}
                 >
                     {options.map((option, index) => {
                         let bgColor;
@@ -68,15 +83,23 @@ export const InputSelect = ({
 
                         return (
                             <ListItem
-                                px={4}
-                                py={2}
                                 bgColor={bgColor}
                                 key={index}
-                                onClick={handleItemClick}
                                 onMouseEnter={() => setActiveOptionIndex(index)}
                                 style={{ cursor: "pointer" }}
+                                className="optionItem"
                             >
-                                {option}
+                                <Button
+                                    borderRadius={0}
+                                    w="full"
+                                    id="optionItem"
+                                    p={4}
+                                    bgColor={bgColor}
+                                    variant="link"
+                                    justifyContent="left"
+                                >
+                                    {option}
+                                </Button>
                             </ListItem>
                         );
                     })}
@@ -98,6 +121,8 @@ export const InputSelect = ({
                 onChange={handleChange}
                 onFocus={() => setShowOptions(true)}
                 onBlur={handleInputBlur}
+                onKeyDown={handleKeyDown}
+                value={input}
             />
             {showOptions && input && <OptionsList />}
         </>
