@@ -1,286 +1,275 @@
 import {
-	HStack,
-	VStack,
-	FormControl,
-	FormLabel,
-	Select,
-	Grid,
-	GridItem,
-	Input,
-	Button,
-	Text,
-} from '@chakra-ui/react';
-import React, { useState, useEffect } from 'react';
-import { countryList } from './utils/country-list';
-import { InputSelect } from './InputSelect';
-import { testMapBox } from './utils/service';
+    HStack,
+    VStack,
+    FormControl,
+    FormLabel,
+    Select,
+    Grid,
+    GridItem,
+    Input,
+    Button,
+    Text,
+} from "@chakra-ui/react";
+import React, { useState, useEffect } from "react";
+import { countryList } from "./utils/country-list";
+import { InputSelect } from "./InputSelect";
+import { testMapBox } from "./utils/service";
 
 interface OptionItem {
-	center: [number, number];
-	context: [
-		{
-			id: string;
-			text: string;
-			wikidata?: string;
-			short_code?: string;
-		}
-	];
-	geometry: {
-		coordinates: [number, number];
-		type: string;
-	};
-	id: string;
-	place_name: string;
-	place_type: string[];
-	properties: {
-		accuracy: string;
-	};
-	relevance: number;
-	type: string;
+    center: [number, number];
+    context: [
+        {
+            id: string;
+            text: string;
+            wikidata?: string;
+            short_code?: string;
+        }
+    ];
+    geometry: {
+        coordinates: [number, number];
+        type: string;
+    };
+    id: string;
+    place_name: string;
+    place_type: string[];
+    properties: {
+        accuracy: string;
+    };
+    relevance: number;
+    type: string;
 }
 
 export interface RipeOption {
-	streetName: string;
-	postcode: string;
-	city: string;
-	address: string;
+    streetName: string;
+    postcode: string;
+    city: string;
+    address: string;
 }
 
 export const AddressForm = () => {
-	const [country, setCountry] = useState('');
-	const [streetName, setStreetName] = useState('');
-	const [zipCode, setZipCode] = useState('');
-	const [city, setCity] = useState('');
-	const [ripeOptions, setRipeOptions] = useState<RipeOption[]>([]);
-	const [rawOptions, setRawOptions] = useState<OptionItem[]>([]);
-	const [selectedOption, setSelectedOption] = useState<OptionItem | undefined>(
-		undefined
-	);
-	const [coordinates, setCoordinates] = useState([0, 0]);
+    const [country, setCountry] = useState("");
+    const [streetName, setStreetName] = useState("");
+    const [zipCode, setZipCode] = useState("");
+    const [city, setCity] = useState("");
+    const [ripeOptions, setRipeOptions] = useState<RipeOption[]>([]);
+    const [rawOptions, setRawOptions] = useState<OptionItem[]>([]);
+    const [selectedOption, setSelectedOption] = useState<
+        OptionItem | undefined
+    >(undefined);
+    const [coordinates, setCoordinates] = useState([0, 0]);
 
-	const prepareCountryISO = (country: string) => {
-		const countryIndex = countryList.countries.findIndex(
-			(item) => item.toLocaleLowerCase() === country.toLocaleLowerCase()
-		);
-		const countryISO = countryList.isoCodes[countryIndex].toLocaleLowerCase();
-		if (countryISO.length) {
-			return countryISO;
-		}
-	};
+    const prepareCountryISO = (country: string) => {
+        const countryIndex = countryList.countries.findIndex(
+            (item) => item.toLocaleLowerCase() === country.toLocaleLowerCase()
+        );
+        const countryISO =
+            countryList.isoCodes[countryIndex].toLocaleLowerCase();
+        if (countryISO.length) {
+            return countryISO;
+        }
+    };
 
-	useEffect(() => {
-		const countryISO = country.length ? prepareCountryISO(country) : '';
+    useEffect(() => {
+        const countryISO = country.length ? prepareCountryISO(country) : "";
 
-		if (streetName.length) {
-			testMapBox(streetName, countryISO).then((res) => {
-				if (res.isSuccess()) {
-					const raw = res.value;
-					setRawOptions(raw);
-					// const ripe = raw.map((item) => `${item.text}`);
-					const ripe: RipeOption[] = raw.map((item) => {
-						return {
-							streetName: item.text,
-							postcode: item.context[0].text,
-							city: item.context[1].text,
-							address: item.address,
-						};
-					});
-					setRipeOptions(ripe);
-				}
-			});
-		}
-	}, [streetName]);
+        if (streetName.length) {
+            testMapBox(streetName, countryISO).then((res) => {
+                if (res.isSuccess()) {
+                    const raw = res.value;
+                    setRawOptions(raw);
+                    // const ripe = raw.map((item) => `${item.text}`);
+                    const ripe: RipeOption[] = raw.map((item) => {
+                        return {
+                            streetName: item.text,
+                            postcode: item.context[0].text,
+                            city: item.context[1].text,
+                            address: item.address,
+                        };
+                    });
+                    setRipeOptions(ripe);
+                }
+            });
+        }
+    }, [streetName]);
 
-	const extractData = (option: OptionItem) => {
-		let postcode = '';
-		let city = '';
-		let country = '';
-		let coordinates = [0, 0];
-		option.context.forEach((item) => {
-			if (item.id.includes('postcode')) {
-				postcode = item.text;
-			}
-			if (item.id.includes('place')) {
-				city = item.text;
-			}
-			if (item.id.includes('country')) {
-				country = item.text;
-			}
-		});
-		coordinates = [option.center[1], option.center[0]];
+    const extractData = (option: OptionItem) => {
+        let postcode = "";
+        let city = "";
+        let country = "";
+        let coordinates = [0, 0];
+        option.context.forEach((item) => {
+            if (item.id.includes("postcode")) {
+                postcode = item.text;
+            }
+            if (item.id.includes("place")) {
+                city = item.text;
+            }
+            if (item.id.includes("country")) {
+                country = item.text;
+            }
+        });
+        coordinates = [option.center[1], option.center[0]];
 
-		return { postcode, city, country, coordinates };
-	};
+        return { postcode, city, country, coordinates };
+    };
 
-	useEffect(() => {
-		console.log('selectedOption', selectedOption);
-		if (selectedOption) {
-			const { postcode, city, country, coordinates } =
-				extractData(selectedOption);
-			setCity(city);
-			setZipCode(postcode);
-			setCountry(country);
-			setCoordinates(coordinates);
-			// setCoordinates(coordinates);
-			// console.log(selectedOption.context[0].id.includes('postcode'));
-			// console.log(selectedOption.context[0].text);
-		}
-	}, [selectedOption]);
+    useEffect(() => {
+        if (selectedOption) {
+            const { postcode, city, country, coordinates } =
+                extractData(selectedOption);
+            setCity(city);
+            setZipCode(postcode);
+            setCountry(country);
+            setCoordinates(coordinates);
+        }
+    }, [selectedOption]);
 
-	const logState = () => {
-		console.log(
-			`country: ${country}, streetName: ${streetName}, zipCode: ${zipCode}, city: ${city}`
-		);
-	};
-
-	const logRawOptions = () => {
-		console.log('rawOptions', rawOptions);
-	};
-
-	const logRipeOptions = () => {
-		console.log('ripeOptions: ', ripeOptions);
-	};
-
-	return (
-		<VStack>
-			<HStack>
-				<Button onClick={logState}>logState</Button>
-				<Button onClick={logRawOptions}>logRawOptions</Button>
-				<Button onClick={logRipeOptions}>logRipeOptions</Button>
-			</HStack>
-			<Grid
-				templateColumns="repeat(3, 1fr)"
-				templateRows="repeat(4, 1fr)"
-				gap={4}
-			>
-				<GridItem colSpan={3}>
-					<CountryFormItem country={country} setCountry={setCountry} />
-				</GridItem>
-				<GridItem colSpan={3}>
-					<StreetNameFormItem
-						streetName={streetName}
-						setStreetName={setStreetName}
-						options={ripeOptions}
-						rawOptions={rawOptions}
-						setSelectedOption={setSelectedOption}
-					/>
-				</GridItem>
-				<GridItem colSpan={1}>
-					<ZipCodeFormItem zipCode={zipCode} setZipCode={setZipCode} />
-				</GridItem>
-				<GridItem colSpan={2}>
-					<CityFormItem city={city} setCity={setCity} />
-				</GridItem>
-				<GridItem>
-					<CoordinatesItem coordinates={coordinates} />
-				</GridItem>
-			</Grid>
-		</VStack>
-	);
+    return (
+        <VStack>
+            <Grid
+                templateColumns="repeat(3, 1fr)"
+                templateRows="repeat(4, 1fr)"
+                gap={4}
+            >
+                <GridItem colSpan={3}>
+                    <CountryFormItem
+                        country={country}
+                        setCountry={setCountry}
+                    />
+                </GridItem>
+                <GridItem colSpan={3}>
+                    <StreetNameFormItem
+                        streetName={streetName}
+                        setStreetName={setStreetName}
+                        options={ripeOptions}
+                        rawOptions={rawOptions}
+                        setSelectedOption={setSelectedOption}
+                    />
+                </GridItem>
+                <GridItem colSpan={1}>
+                    <ZipCodeFormItem
+                        zipCode={zipCode}
+                        setZipCode={setZipCode}
+                    />
+                </GridItem>
+                <GridItem colSpan={2}>
+                    <CityFormItem city={city} setCity={setCity} />
+                </GridItem>
+                <GridItem>
+                    <CoordinatesItem coordinates={coordinates} />
+                </GridItem>
+            </Grid>
+        </VStack>
+    );
 };
 
 const CountryFormItem = ({
-	country,
-	setCountry,
+    country,
+    setCountry,
 }: {
-	country: string;
-	setCountry: (arg0: string) => void;
+    country: string;
+    setCountry: (arg0: string) => void;
 }) => {
-	const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-		setCountry(e.target.value);
-	};
+    const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        setCountry(e.target.value);
+    };
 
-	return (
-		<FormControl>
-			<FormLabel htmlFor="country">Country</FormLabel>
-			<Select
-				name="country"
-				size="lg"
-				placeholder="Select country"
-				onChange={handleChange}
-				value={country}
-			>
-				{countryList.countries.map((country, index) => (
-					<option key={index} value={country}>
-						{country}
-					</option>
-				))}
-			</Select>
-		</FormControl>
-	);
+    return (
+        <FormControl>
+            <FormLabel htmlFor="country">Country</FormLabel>
+            <Select
+                name="country"
+                size="lg"
+                placeholder="Select country"
+                onChange={handleChange}
+                value={country}
+            >
+                {countryList.countries.map((country, index) => (
+                    <option key={index} value={country}>
+                        {country}
+                    </option>
+                ))}
+            </Select>
+        </FormControl>
+    );
 };
 
 const StreetNameFormItem = ({
-	streetName,
-	setStreetName,
-	options,
-	rawOptions,
-	setSelectedOption,
+    streetName,
+    setStreetName,
+    options,
+    rawOptions,
+    setSelectedOption,
 }: {
-	streetName: string;
-	setStreetName: (arg0: string) => void;
-	options: RipeOption[];
-	rawOptions: any[];
-	setSelectedOption: (arg0: any) => void;
+    streetName: string;
+    setStreetName: (arg0: string) => void;
+    options: RipeOption[];
+    rawOptions: any[];
+    setSelectedOption: (arg0: any) => void;
 }) => {
-	return (
-		<FormControl>
-			<FormLabel htmlFor="streetName">Street name</FormLabel>
-			<InputSelect
-				size="lg"
-				options={options}
-				option={streetName}
-				setOption={setStreetName}
-				rawOptions={rawOptions}
-				setSelectedOption={setSelectedOption}
-			/>
-		</FormControl>
-	);
+    return (
+        <FormControl>
+            <FormLabel htmlFor="streetName">Street name</FormLabel>
+            <InputSelect
+                size="lg"
+                options={options}
+                input={streetName}
+                setInput={setStreetName}
+                rawOptions={rawOptions}
+                setSelectedOption={setSelectedOption}
+            />
+        </FormControl>
+    );
 };
 
 const ZipCodeFormItem = ({
-	zipCode,
-	setZipCode,
+    zipCode,
+    setZipCode,
 }: {
-	zipCode: string;
-	setZipCode: (arg0: string) => void;
+    zipCode: string;
+    setZipCode: (arg0: string) => void;
 }) => {
-	const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-		setZipCode(e.target.value);
-	};
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setZipCode(e.target.value);
+    };
 
-	return (
-		<FormControl>
-			<FormLabel htmlFor="zipCode">Zip code</FormLabel>
-			<Input size="lg" name="zipCode" value={zipCode} onChange={handleChange} />
-		</FormControl>
-	);
+    return (
+        <FormControl>
+            <FormLabel htmlFor="zipCode">Zip code</FormLabel>
+            <Input
+                size="lg"
+                name="zipCode"
+                value={zipCode}
+                onChange={handleChange}
+            />
+        </FormControl>
+    );
 };
 
 const CityFormItem = ({
-	city,
-	setCity,
+    city,
+    setCity,
 }: {
-	city: string;
-	setCity: (arg0: string) => void;
+    city: string;
+    setCity: (arg0: string) => void;
 }) => {
-	const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-		setCity(e.target.value);
-	};
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setCity(e.target.value);
+    };
 
-	return (
-		<FormControl>
-			<FormLabel htmlFor="city">City</FormLabel>
-			<Input size="lg" name="city" value={city} onChange={handleChange} />
-		</FormControl>
-	);
+    return (
+        <FormControl>
+            <FormLabel htmlFor="city">City</FormLabel>
+            <Input size="lg" name="city" value={city} onChange={handleChange} />
+        </FormControl>
+    );
 };
 
 const CoordinatesItem = ({ coordinates }: { coordinates: number[] }) => {
-	return (
-		<VStack>
-			<Text fontWeight="bold">Coordinates</Text>
-			<Text>{`${coordinates[0]},${coordinates[1]}`}</Text>
-		</VStack>
-	);
+    return (
+        <VStack>
+            <Text fontWeight="bold">Coordinates</Text>
+            <Text>{`${coordinates[0]},${coordinates[1]}`}</Text>
+        </VStack>
+    );
 };

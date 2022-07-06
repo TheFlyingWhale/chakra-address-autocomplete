@@ -5,7 +5,7 @@ function App() {
     return (
         <Flex
             m={0}
-            p={12}
+            p={4}
             w="full"
             maxWidth="full"
             h="full"
