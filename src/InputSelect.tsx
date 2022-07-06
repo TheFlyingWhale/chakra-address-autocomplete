@@ -4,10 +4,10 @@ import { RipeOption } from "./AddressForm";
 
 interface InputSelectProps {
     placeholder?: string;
-    options: RipeOption[];
     size: string;
     input: string;
     setInput: (arg0: string) => void;
+    options: RipeOption[];
     rawOptions: any[];
     setSelectedOption: (arg0: any) => void;
 }
@@ -21,15 +21,11 @@ export const InputSelect = ({
     rawOptions,
     setSelectedOption,
 }: InputSelectProps) => {
-    // const [input, setInput] = useState<string>(option);
     const [activeOptionIndex, setActiveOptionIndex] = useState<number>(0);
     const [showOptions, setShowOptions] = useState<boolean>(false);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        e.preventDefault();
-        const userInput = e.target.value;
-
-        setInput(userInput);
+        setInput(e.target.value);
         setActiveOptionIndex(0);
         setShowOptions(true);
     };
@@ -56,7 +52,6 @@ export const InputSelect = ({
             setSelectedOption(rawOptions[activeOptionIndex]);
             const { streetName, address } = options[activeOptionIndex];
             setInput(determineInput(streetName, address));
-            // setInput(determineInput(streetName, address));
             setActiveOptionIndex(0);
             setShowOptions(false);
         }

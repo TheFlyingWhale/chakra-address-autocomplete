@@ -1,5 +1,4 @@
 import {
-    HStack,
     VStack,
     FormControl,
     FormLabel,
@@ -7,7 +6,6 @@ import {
     Grid,
     GridItem,
     Input,
-    Button,
     Text,
 } from "@chakra-ui/react";
 import React, { useState, useEffect } from "react";
@@ -213,9 +211,9 @@ const StreetNameFormItem = ({
             <InputSelect
                 size="lg"
                 options={options}
+                rawOptions={rawOptions}
                 input={streetName}
                 setInput={setStreetName}
-                rawOptions={rawOptions}
                 setSelectedOption={setSelectedOption}
             />
         </FormControl>
